@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Admin Login — SmartCertVerify{% endblock %}
+
+{% block extra_css %}
+.login-section {
+  min-height: calc(100vh - 130px);
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+  padding: 3rem 0;
+}
+.login-card {
+  background: white;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+}
+.login-logo {
+  width: 70px; height: 70px;
+  background: var(--navy);
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+  color: var(--gold);
+}
+.login-card h2 { font-size: 1.6rem; text-align: center; margin-bottom: 0.25rem; }
+.login-card .sub { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+.form-label { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+.form-control {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+.form-control:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(13,27,42,0.08); }
+.input-group-text {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  color: var(--muted);
+}
+.btn-login {
+  background: var(--navy);
+  color: white;
+  font-weight: 700;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 10px;
+  width: 100%;
+  font-size: 1rem;
+  transition: all 0.25s;
+}
+.btn-login:hover { background: var(--navy2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,27,42,0.25); }
+.credentials-hint {
+  background: #f0f4ff;
+  border: 1px solid #d0d9ff;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  color: #4a5568;
+  margin-top: 1rem;
+}
+{% endblock %}
+
+{% block content %}
+<section class="login-section">
+  <div class="container">
+    <div class="login-card">
+      <div class="login-logo"><i class="bi bi-shield-lock-fill"></i></div>
+      <h2>Admin Login</h2>
+      <p class="sub">Secure access to the certificate management panel</p>
+
+      <form method="POST" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input type="text" name="username" class="form-control"
+                   placeholder="Enter admin username" required
+                   style="border-left:none;border-radius:0 10px 10px 0;">
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password" name="password" id="passwordField" class="form-control"
+                   placeholder="Enter password" required
+                   style="border-left:none;border-right:none;border-radius:0;">
+            <button type="button" class="input-group-text" onclick="togglePwd()"
+                    style="border-left:none;border-radius:0 10px 10px 0;cursor:pointer;">
+              <i class="bi bi-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn-login">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Dashboard
+        </button>
+      </form>
+
+     
+
+      <div class="text-center mt-3">
+        <a href="{{ url_for('index') }}" class="text-muted" style="font-size:0.85rem;text-decoration:none;">
+          <i class="bi bi-arrow-left me-1"></i>Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePwd() {
+  const f = document.getElementById('passwordField');
+  const e = document.getElementById('eyeIcon');
+  if (f.type === 'password') {
+    f.type = 'text';
+    e.className = 'bi bi-eye-slash';
+  } else {
+    f.type = 'password';
+    e.className = 'bi bi-eye';
+  }
+}
+</script>
+{% endblock %}

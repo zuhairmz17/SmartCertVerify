@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SmartCertVerify{% endblock %}
+
+{% block extra_css %}
+.dashboard-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+  color: white;
+  padding: 2.5rem 0;
+  margin-bottom: 2.5rem;
+}
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.75rem;
+  border: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: all 0.25s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+.stat-icon {
+  width: 60px; height: 60px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+.stat-icon.navy { background: var(--navy); color: var(--gold); }
+.stat-icon.gold { background: var(--gold); color: var(--navy); }
+.stat-icon.green { background: #e6f9f0; color: #16a34a; }
+.stat-icon.blue { background: #eff6ff; color: #2563eb; }
+.stat-label { font-size: 0.82rem; color: var(--muted); font-weight: 500; margin-bottom: 0.25rem; }
+.stat-value { font-size: 2rem; font-weight: 700; line-height: 1; font-family: 'Playfair Display', serif; }
+
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.section-header h5 { margin: 0; font-size: 1.05rem; }
+.table-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.table { margin: 0; }
+.table thead th {
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: none;
+  padding: 0.85rem 1rem;
+}
+.table tbody td {
+  vertical-align: middle;
+  padding: 0.85rem 1rem;
+  font-size: 0.88rem;
+  border-color: #f0f0f0;
+}
+.table tbody tr:hover { background: #fafafa; }
+.cert-id-badge {
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 6px;
+  font-family: monospace;
+}
+.quick-action-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.25s;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.quick-action-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+.qa-icon {
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  margin: 0 auto 0.75rem;
+}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="container-xl">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <h1 style="font-size:1.9rem;margin-bottom:0.25rem;">
+          Welcome, <span style="color:var(--gold);">{{ session.get('admin_username','Admin') }}</span>
+        </h1>
+        <p style="color:rgba(255,255,255,0.6);margin:0;font-size:0.9rem;">
+          <i class="bi bi-calendar3 me-1"></i>{{ now.strftime('%A, %d %B %Y') if now else '' }}
+          &nbsp;|&nbsp; Certificate Management Dashboard
+        </p>
+      </div>
+      <a href="{{ url_for('add_certificate') }}" class="btn-gold btn px-4 py-2 rounded-3">
+        <i class="bi bi-plus-lg me-2"></i>Add New Certificate
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container-xl pb-5">
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon navy"><i class="bi bi-award-fill"></i></div>
+        <div>
+          <div class="stat-label">Total Certificates</div>
+          <div class="stat-value text-navy">{{ total }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon gold"><i class="bi bi-calendar-check"></i></div>
+        <div>
+          <div class="stat-label">This Month</div>
+          <div class="stat-value" style="color:var(--navy)">{{ this_month }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="bi bi-qr-code"></i></div>
+        <div>
+          <div class="stat-label">QR Codes Active</div>
+          <div class="stat-value" style="color:#16a34a">{{ total }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="bi bi-shield-check"></i></div>
+        <div>
+          <div class="stat-label">Verification Rate</div>
+          <div class="stat-value" style="color:#2563eb">100%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Recent Certificates table -->
+    <div class="col-lg-8">
+      <div class="section-header">
+        <h5><i class="bi bi-clock-history me-2 text-gold"></i>Recent Certificates</h5>
+        <a href="{{ url_for('manage_certificates') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+          View All <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+      <div class="table-card">
+        {% if recent %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Cert ID</th>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Grade</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cert in recent %}
+              <tr>
+                <td><span class="cert-id-badge">{{ cert.certificate_id }}</span></td>
+                <td><strong>{{ cert.student_name }}</strong></td>
+                <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ cert.course_name }}">{{ cert.course_name }}</td>
+                <td><span class="badge bg-success-subtle text-success">{{ cert.grade }}</span></td>
+                <td style="font-size:0.82rem;color:var(--muted)">{{ cert.issue_date }}</td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="{{ url_for('certificate_preview', certificate_id=cert.certificate_id) }}"
+                       class="btn btn-sm btn-outline-primary rounded-pill" title="Preview">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('verify_direct', certificate_id=cert.certificate_id) }}"
+                       class="btn btn-sm btn-outline-success rounded-pill" title="Verify">
+                      <i class="bi bi-shield-check"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-inbox" style="font-size:3rem;color:#cbd5e0;"></i>
+          <p class="text-muted mt-2">No certificates yet. <a href="{{ url_for('add_certificate') }}">Create the first one!</a></p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+      <h5 class="mb-3"><i class="bi bi-lightning-charge me-2 text-gold"></i>Quick Actions</h5>
+      <div class="d-flex flex-column gap-3">
+        <a href="{{ url_for('add_certificate') }}" class="quick-action-card">
+          <div class="qa-icon" style="background:var(--navy);color:var(--gold)"><i class="bi bi-plus-circle-fill"></i></div>
+          <h6 style="margin:0;font-size:0.95rem;">Add Certificate</h6>
+          <small class="text-muted">Issue a new certificate</small>
+        </a>
+        <a href="{{ url_for('manage_certificates') }}" class="quick-action-card">
+          <div class="qa-icon" style="background:#eff6ff;color:#2563eb"><i class="bi bi-table"></i></div>
+          <h6 style="margin:0;font-size:0.95rem;">Manage Certificates</h6>
+          <small class="text-muted">Search, view, delete</small>
+        </a>
+        <a href="{{ url_for('verify') }}" class="quick-action-card">
+          <div class="qa-icon" style="background:#e6f9f0;color:#16a34a"><i class="bi bi-shield-check"></i></div>
+          <h6 style="margin:0;font-size:0.95rem;">Verify Certificate</h6>
+          <small class="text-muted">Check validity by ID</small>
+        </a>
+        <a href="{{ url_for('logout') }}" class="quick-action-card" style="border-color:#fee2e2;">
+          <div class="qa-icon" style="background:#fee2e2;color:#dc2626"><i class="bi bi-box-arrow-right"></i></div>
+          <h6 style="margin:0;font-size:0.95rem;color:#dc2626;">Logout</h6>
+          <small class="text-muted">End admin session</small>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Inject current date into header
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const opts = { weekday:'long', day:'2-digit', month:'long', year:'numeric' };
+  document.querySelectorAll('.current-date').forEach(el => {
+    el.textContent = now.toLocaleDateString('en-IN', opts);
+  });
+});
+</script>
+{% endblock %}

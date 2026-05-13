@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Certificate Not Found — SmartCertVerify{% endblock %}
+
+{% block extra_css %}
+.error-section {
+  min-height: calc(100vh - 130px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem 0;
+}
+.error-card {
+  background: white; border-radius: 20px; padding: 3rem;
+  text-align: center; max-width: 520px; width: 100%;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.06);
+}
+.error-icon {
+  width: 90px; height: 90px;
+  background: #fee2e2; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; color: #dc2626;
+  margin: 0 auto 1.5rem;
+}
+{% endblock %}
+
+{% block content %}
+<section class="error-section">
+  <div class="container">
+    <div class="error-card mx-auto">
+      <div class="error-icon"><i class="bi bi-x-circle-fill"></i></div>
+      <h2 style="font-size:1.6rem;margin-bottom:0.5rem;">Certificate Not Found</h2>
+      {% if cert_id %}
+      <p class="text-muted">No certificate found with ID <strong style="font-family:monospace;color:var(--navy);">{{ cert_id }}</strong>.</p>
+      {% else %}
+      <p class="text-muted">The page you're looking for doesn't exist or the certificate ID is invalid.</p>
+      {% endif %}
+      <div style="background:#fff9e6;border:1px solid #fde68a;border-radius:12px;padding:1rem;text-align:left;margin:1.5rem 0;font-size:0.85rem;color:#92400e;">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>This certificate may be:</strong>
+        <ul style="margin:0.5rem 0 0 1.5rem;padding:0;">
+          <li>Fraudulent or fake</li>
+          <li>Entered with an incorrect ID</li>
+          <li>Not issued by this institution</li>
+        </ul>
+      </div>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="{{ url_for('verify') }}" class="btn btn-gold rounded-3 px-4 py-2">
+          <i class="bi bi-arrow-counterclockwise me-2"></i>Try Again
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary rounded-3 px-4 py-2">
+          <i class="bi bi-house me-2"></i>Home
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

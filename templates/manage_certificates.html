@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Manage Certificates — SmartCertVerify{% endblock %}
+
+{% block extra_css %}
+.page-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+  color: white; padding: 2rem 0; margin-bottom: 2.5rem;
+}
+.search-bar {
+  background: white; border-radius: 14px; padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(0,0,0,0.07); box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+}
+.search-input {
+  flex: 1; min-width: 220px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+  padding: 0.65rem 1rem; font-size: 0.92rem; transition: all 0.2s;
+}
+.search-input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(13,27,42,0.08); outline: none; }
+.table-card {
+  background: white; border-radius: 16px; border: 1px solid rgba(0,0,0,0.06);
+  overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.table { margin: 0; }
+.table thead th {
+  background: var(--navy); color: var(--gold); font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase; border: none; padding: 0.9rem 1rem;
+}
+.table tbody td { vertical-align: middle; padding: 0.85rem 1rem; font-size: 0.88rem; border-color: #f5f5f5; }
+.table tbody tr:hover { background: #fafafa; }
+.cert-id-badge {
+  background: var(--navy); color: var(--gold); font-size: 0.78rem; font-weight: 600;
+  padding: 0.25rem 0.7rem; border-radius: 6px; font-family: monospace;
+}
+.btn-action { padding: 0.3rem 0.7rem; font-size: 0.8rem; border-radius: 8px; }
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+.empty-state i { font-size: 3.5rem; color: #e2e8f0; display: block; margin-bottom: 1rem; }
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container-xl">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-outline-light rounded-pill"><i class="bi bi-arrow-left"></i></a>
+      <div class="flex-grow-1">
+        <h1 style="font-size:1.7rem;margin:0;">Manage Certificates</h1>
+        <p style="color:rgba(255,255,255,0.6);margin:0;font-size:0.88rem;">Search, view, and manage all issued certificates</p>
+      </div>
+      <a href="{{ url_for('add_certificate') }}" class="btn btn-gold rounded-3 px-4">
+        <i class="bi bi-plus-lg me-1"></i>Add New
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container-xl pb-5">
+  <!-- Search -->
+  <form method="GET" class="search-bar">
+    <i class="bi bi-search text-muted"></i>
+    <input type="text" name="search" class="search-input" placeholder="Search by name, ID, course, department..."
+           value="{{ search }}">
+    <button type="submit" class="btn btn-sm bg-navy text-white rounded-3 px-3 py-2" style="background:var(--navy);border:none;">Search</button>
+    {% if search %}
+    <a href="{{ url_for('manage_certificates') }}" class="btn btn-sm btn-outline-secondary rounded-3">Clear</a>
+    {% endif %}
+    <span class="text-muted ms-auto" style="font-size:0.85rem;">
+      {{ certs.total }} certificate{{ 's' if certs.total != 1 else '' }} found
+    </span>
+  </form>
+
+  <!-- Table -->
+  <div class="table-card">
+    {% if certs.items %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Certificate ID</th>
+            <th>Student Name</th>
+            <th>Course</th>
+            <th>Department</th>
+            <th>Grade</th>
+            <th>Issue Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cert in certs.items %}
+          <tr>
+            <td style="color:var(--muted);font-size:0.82rem;">{{ loop.index + (certs.page-1)*15 }}</td>
+            <td><span class="cert-id-badge">{{ cert.certificate_id }}</span></td>
+            <td><strong>{{ cert.student_name }}</strong></td>
+            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ cert.course_name }}">{{ cert.course_name }}</td>
+            <td>{{ cert.department }}</td>
+            <td><span class="badge bg-success-subtle text-success border border-success-subtle">{{ cert.grade }}</span></td>
+            <td style="font-size:0.82rem;">{{ cert.issue_date }}</td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{{ url_for('certificate_preview', certificate_id=cert.certificate_id) }}"
+                   class="btn btn-outline-primary btn-action" title="Preview"><i class="bi bi-eye"></i></a>
+                <a href="{{ url_for('verify_direct', certificate_id=cert.certificate_id) }}"
+                   class="btn btn-outline-success btn-action" title="Verify"><i class="bi bi-shield-check"></i></a>
+                <a href="{{ url_for('download_certificate', certificate_id=cert.certificate_id) }}"
+                   class="btn btn-outline-secondary btn-action" title="Download"><i class="bi bi-download"></i></a>
+                <form method="POST" action="{{ url_for('delete_certificate', cert_id=cert.id) }}"
+                      onsubmit="return confirm('Delete {{ cert.certificate_id }}? This cannot be undone.')">
+                  <button type="submit" class="btn btn-outline-danger btn-action" title="Delete"><i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if certs.pages > 1 %}
+    <div class="d-flex justify-content-center gap-2 p-3">
+      {% if certs.has_prev %}
+      <a href="{{ url_for('manage_certificates', page=certs.prev_num, search=search) }}"
+         class="btn btn-sm btn-outline-secondary rounded-pill px-3">← Prev</a>
+      {% endif %}
+      {% for pg in certs.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if pg %}
+        <a href="{{ url_for('manage_certificates', page=pg, search=search) }}"
+           class="btn btn-sm rounded-pill px-3 {% if pg == certs.page %}btn-gold{% else %}btn-outline-secondary{% endif %}">{{ pg }}</a>
+        {% else %}
+        <span class="btn btn-sm btn-outline-secondary rounded-pill px-3 disabled">…</span>
+        {% endif %}
+      {% endfor %}
+      {% if certs.has_next %}
+      <a href="{{ url_for('manage_certificates', page=certs.next_num, search=search) }}"
+         class="btn btn-sm btn-outline-secondary rounded-pill px-3">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <h5>No certificates found</h5>
+      <p>{% if search %}No results for "{{ search }}". <a href="{{ url_for('manage_certificates') }}">Clear search</a>{% else %}<a href="{{ url_for('add_certificate') }}">Create your first certificate</a>{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

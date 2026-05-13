@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Add Certificate — SmartCertVerify{% endblock %}
+
+{% block extra_css %}
+.page-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2.5rem;
+}
+.form-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.form-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.form-label { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+.form-label span { color: #dc2626; }
+.form-control, .form-select {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 0.92rem;
+  transition: all 0.2s;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(13,27,42,0.08);
+}
+textarea.form-control { resize: vertical; min-height: 90px; }
+.btn-generate {
+  background: var(--navy);
+  color: white;
+  font-weight: 700;
+  padding: 0.85rem 2.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.25s;
+}
+.btn-generate:hover { background: var(--navy2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,27,42,0.25); }
+.btn-reset {
+  background: white;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0.85rem 2rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+.btn-reset:hover { background: #f8fafc; border-color: #cbd5e0; }
+.info-card {
+  background: #f0f4ff;
+  border: 1px solid #d0d9ff;
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+.info-card h6 { font-size: 0.9rem; color: #2563eb; margin-bottom: 0.75rem; }
+.info-item { display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem; }
+.info-item i { color: #2563eb; margin-top: 0.1rem; }
+.info-item span { font-size: 0.84rem; color: #4a5568; }
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container-xl">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-outline-light rounded-pill">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <div>
+        <h1 style="font-size:1.7rem;margin:0;">Add New Certificate</h1>
+        <p style="color:rgba(255,255,255,0.6);margin:0;font-size:0.88rem;">Fill in the details below to issue a digitally verified certificate</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-xl pb-5">
+  <div class="row g-4">
+    <!-- Form -->
+    <div class="col-lg-8">
+      <div class="form-card">
+        <form method="POST" id="certForm" novalidate>
+
+          <!-- Student Information -->
+          <div class="form-section-title"><i class="bi bi-person me-2"></i>Student Information</div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-12">
+              <label class="form-label">Student Full Name <span>*</span></label>
+              <input type="text" name="student_name" class="form-control"
+                     placeholder="e.g. Priya Sharma"
+                     value="{{ form_data.get('student_name','') }}" required>
+            </div>
+          </div>
+
+          <!-- Course Information -->
+          <div class="form-section-title"><i class="bi bi-book me-2"></i>Course & Department</div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Course Name <span>*</span></label>
+              <input type="text" name="course_name" class="form-control"
+                     placeholder="e.g. Machine Learning"
+                     value="{{ form_data.get('course_name','') }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Department <span>*</span></label>
+              <input type="text" name="department" class="form-control"
+                     placeholder="e.g. Computer Science"
+                     value="{{ form_data.get('department','') }}" required>
+            </div>
+          </div>
+
+          <!-- Institution & Date -->
+          <div class="form-section-title"><i class="bi bi-building me-2"></i>Institution Details</div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-8">
+              <label class="form-label">Institution Name <span>*</span></label>
+              <input type="text" name="institution_name" class="form-control"
+                     placeholder="e.g. Indian Institute of Technology Madras"
+                     value="{{ form_data.get('institution_name','') }}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Date of Issue <span>*</span></label>
+              <input type="date" name="issue_date" class="form-control"
+                     value="{{ form_data.get('issue_date','') }}" required>
+            </div>
+          </div>
+
+          <!-- Grade & Description -->
+          <div class="form-section-title"><i class="bi bi-star me-2"></i>Performance</div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label class="form-label">Grade / Score <span>*</span></label>
+              <select name="grade" class="form-select" required>
+                <option value="">-- Select Grade --</option>
+                {% for g in ['A+ (Outstanding)','A (Excellent)','B+ (Very Good)','B (Good)','C (Average)','Pass','Distinction','First Class','Merit'] %}
+                <option value="{{ g }}" {% if form_data.get('grade')==g %}selected{% endif %}>{{ g }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Certificate Description</label>
+              <textarea name="description" class="form-control"
+                        placeholder="Optional: Additional notes about this certificate...">{{ form_data.get('description','') }}</textarea>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="d-flex gap-3 pt-2">
+            <button type="submit" class="btn-generate">
+              <i class="bi bi-patch-check me-2"></i>Generate Certificate
+            </button>
+            <button type="reset" class="btn-reset" onclick="clearForm()">
+              <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Info Sidebar -->
+    <div class="col-lg-4">
+      <div class="info-card mb-4">
+        <h6><i class="bi bi-info-circle-fill me-2"></i>What happens next?</h6>
+        <div class="info-item"><i class="bi bi-1-circle"></i><span>A unique Certificate ID is generated (e.g. CERT-2026-001)</span></div>
+        <div class="info-item"><i class="bi bi-2-circle"></i><span>A QR code is created linking to the verification URL</span></div>
+        <div class="info-item"><i class="bi bi-3-circle"></i><span>Certificate image is generated and stored securely</span></div>
+        <div class="info-item"><i class="bi bi-4-circle"></i><span>You can preview and download the certificate immediately</span></div>
+      </div>
+
+      <div class="info-card" style="background:#fff9e6;border-color:#fde68a;">
+        <h6 style="color:#92400e;"><i class="bi bi-exclamation-triangle-fill me-2"></i>Important Notes</h6>
+        <div class="info-item"><i class="bi bi-dot" style="color:#92400e;"></i><span>All fields marked with <strong>*</strong> are required</span></div>
+        <div class="info-item"><i class="bi bi-dot" style="color:#92400e;"></i><span>Certificate IDs are automatically generated and cannot be changed</span></div>
+        <div class="info-item"><i class="bi bi-dot" style="color:#92400e;"></i><span>Certificates are permanently stored in the database</span></div>
+      </div>
+
+      <div class="mt-3">
+        <a href="{{ url_for('manage_certificates') }}" class="btn btn-outline-secondary w-100 rounded-3">
+          <i class="bi bi-table me-2"></i>Manage Existing Certificates
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Set today's date as default
+document.addEventListener('DOMContentLoaded', () => {
+  const dateInput = document.querySelector('input[name="issue_date"]');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
+});
+
+function clearForm() {
+  document.getElementById('certForm').reset();
+  const dateInput = document.querySelector('input[name="issue_date"]');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+}
+
+// Form validation
+document.getElementById('certForm').addEventListener('submit', function(e) {
+  const required = this.querySelectorAll('[required]');
+  let valid = true;
+  required.forEach(field => {
+    field.classList.remove('is-invalid');
+    if (!field.value.trim()) {
+      field.classList.add('is-invalid');
+      valid = false;
+    }
+  });
+  if (!valid) {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    // Show loading
+    const btn = this.querySelector('.btn-generate');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+    btn.disabled = true;
+  }
+});
+</script>
+{% endblock %}

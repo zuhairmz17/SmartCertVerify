@@ -1,0 +1,17 @@
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+database.db
+.env
+*.env
+static/qr_codes/
+static/certificates/
+*.log
+.DS_Store
+*.egg-info/
+.build/
+cover/
+htmlcov/
