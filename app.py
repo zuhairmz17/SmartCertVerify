@@ -523,6 +523,8 @@ def server_error(e):
 
 # ─── Init ───────────────────────────────────────────────────────────────────────
 
+db_initialized = False
+
 def init_db():
     """Initialize database and create default admin."""
     with app.app_context():
@@ -535,6 +537,13 @@ def init_db():
             db.session.add(admin)
             db.session.commit()
             print(f"✅ Default admin created: {admin_user}")
+
+@app.before_request
+def initialize_database():
+    global db_initialized
+    if not db_initialized:
+        init_db()
+        db_initialized = True
 
 if __name__ == '__main__':
     init_db()
