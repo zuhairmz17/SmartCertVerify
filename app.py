@@ -16,7 +16,8 @@ import hashlib
 from datetime import datetime
 from functools import wraps
 from flask import (Flask, render_template, request, redirect,
-                   url_for, session, flash, send_file, jsonify, abort)
+                   url_for, session, flash, send_file, jsonify, abort,
+                   has_request_context)
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from PIL import Image, ImageDraw, ImageFont
@@ -28,10 +29,19 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'smartcert-secret-key-2026-secure')
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASE_DIR, 'database.db')}"
+
+database_path = os.environ.get('DATABASE_PATH', os.path.join(BASE_DIR, 'database.db'))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL', f"sqlite:///{database_path}")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['QR_CODE_FOLDER'] = os.path.join(BASE_DIR, 'static', 'qr_codes')
 app.config['CERT_FOLDER'] = os.path.join(BASE_DIR, 'static', 'certificates')
+
+# Ensure required runtime folders exist.
+os.makedirs(app.config['QR_CODE_FOLDER'], exist_ok=True)
+os.makedirs(app.config['CERT_FOLDER'], exist_ok=True)
+if database_path:
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
 
 db = SQLAlchemy(app)
 
@@ -97,6 +107,16 @@ def login_required(f):
     return decorated
 
 
+def get_app_base_url():
+    """Return the public base URL for the app, using env or request context."""
+    base_url = os.environ.get('APP_BASE_URL')
+    if base_url:
+        return base_url.rstrip('/')
+    if has_request_context():
+        return request.host_url.rstrip('/')
+    return 'http://127.0.0.1:5000'
+
+
 def generate_certificate_id():
     """Generate a unique certificate ID in format CERT-YYYY-NNN."""
     year = datetime.now().year
@@ -117,7 +137,7 @@ def generate_certificate_id():
 
 def generate_qr_code(certificate_id):
     """Generate a QR code for the given certificate ID and save it."""
-    verify_url = f"http://127.0.0.1:5000/verify/{certificate_id}"
+    verify_url = f"{get_app_base_url()}/verify/{certificate_id}"
 
     qr = qrcode.QRCode(
         version=1,
@@ -244,7 +264,7 @@ def generate_certificate_image(cert):
         draw.text((width // 2, 732), "Scan to verify", fill='white', font=small_font, anchor='mm')
 
     # Bottom band text
-    draw.text((width // 2, height - 57), "Verify at: http://127.0.0.1:5000/verify/" + cert.certificate_id,
+    draw.text((width // 2, height - 57), "Verify at: " + f"{get_app_base_url()}/verify/{cert.certificate_id}",
               fill='#aaaaaa', font=small_font, anchor='mm')
 
     # Save
